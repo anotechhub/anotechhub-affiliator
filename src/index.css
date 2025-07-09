@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'sans-serif';
+}
+
+.bg-custom-teal-active {
+  background-color: #01a1a8 !important;
+}
