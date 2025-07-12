@@ -3,10 +3,10 @@ import { FileText, Settings } from 'lucide-react';
 
 const Icon = ({ component: Component, className }) => <Component className={className} />;
 
-const Sidebar = ({ currentPage, setCurrentPage }) => {
+const Sidebar = ({ currentPage, setCurrentPage, uiText }) => {
     const navItems = [
-        { id: 'generator', label: 'Generator', icon: FileText },
-        { id: 'settings', label: 'Settings', icon: Settings }
+        { id: 'generator', label: uiText.generator, icon: FileText },
+        { id: 'settings', label: uiText.settings, icon: Settings }
     ];
 
     return (
