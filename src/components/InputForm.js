@@ -1,7 +1,6 @@
 // src/components/InputForm.js
 
 import React from 'react';
-import { jsPDF } from "jspdf";
 import { ChevronDown, Bot, RotateCcw, FileDown } from 'lucide-react';
 
 // ... (SelectWrapper component can remain the same)
@@ -18,7 +17,7 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
         productName, setProductName, productDesc, setProductDesc,
         languageStyle, setLanguageStyle, hookType, setHookType, scriptCount,
         setScriptCount, carouselSlideCount, setCarouselSlideCount, targetAudience,
-        setTargetAudience, generatedContent, contentType, setContentType, uiText
+        setTargetAudience, generatedContent, contentType, setContentType, uiText, language
     } = props;
 
     const inputStyle = "w-full p-3 bg-white/60 dark:bg-slate-800/60 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 ring-custom-teal focus:border-custom-teal outline-none transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500";
