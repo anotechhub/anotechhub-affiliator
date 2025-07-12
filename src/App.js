@@ -1,5 +1,3 @@
-// src/App.js
-
 import React, { useState, useEffect } from 'react';
 import { uiTextConfig, systemPrompts } from './config';
 import { setCookie, getCookie } from './utils/cookieHelper';
@@ -13,18 +11,15 @@ import ThankYouModal from './components/ThankYouModal';
 import ApiKeyAppliedModal from './components/ApiKeyAppliedModal';
 import RegenerateModal from './components/RegenerateModal';
 
-// This would be handled by a proper backend/environment variable in production
-const DEFAULT_API_KEY = 'AIzaSyCjYKoFJiw5TiXgxEd0tX5DqyR2GDhULE'; [cite: 7]
-
 export default function App() {
     // Core App State
     const [theme, setTheme] = useState('light');
-    const [language, setLanguage] = useState('id'); [cite: 251]
+    const [language, setLanguage] = useState('id');
     const [currentPage, setCurrentPage] = useState('generator');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [generatedContent, setGeneratedContent] = useState([]);
-    const [showInitialSetup, setShowInitialSetup] = useState(false); [cite: 266]
+    const [showInitialSetup, setShowInitialSetup] = useState(false);
     
     // Modal State
     const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
@@ -38,12 +33,12 @@ export default function App() {
     // Form Inputs State
     const [productName, setProductName] = useState('');
     const [productDesc, setProductDesc] = useState('');
-    const [languageStyle, setLanguageStyle] = useState('Storytelling'); [cite: 257]
-    const [hookType, setHookType] = useState('Stop Scrolling'); [cite: 258]
+    const [languageStyle, setLanguageStyle] = useState('Storytelling');
+    const [hookType, setHookType] = useState('Stop Scrolling');
     const [contentType, setContentType] = useState('single');
     const [scriptCount, setScriptCount] = useState(1);
     const [carouselSlideCount, setCarouselSlideCount] = useState(5);
-    const [targetAudience, setTargetAudience] = useState('Young Professionals'); [cite: 261]
+    const [targetAudience, setTargetAudience] = useState('Young Professionals');
     
     // Settings State
     const [systemPrompt, setSystemPrompt] = useState(systemPrompts[language]);
@@ -89,7 +84,7 @@ export default function App() {
     // --- API & LOGIC ---
 
     const getApiResponse = async (prompt, schema) => {
-        const activeApiKey = apiMode === 'custom' && savedApiKey ? savedApiKey : DEFAULT_API_KEY; [cite: 281]
+        const activeApiKey = apiMode === 'custom' && savedApiKey ? savedApiKey : process.env.REACT_APP_DEFAULT_API_KEY;
         const payload = {
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             generationConfig: { responseMimeType: "application/json", responseSchema: schema }
@@ -111,7 +106,7 @@ export default function App() {
             setError(uiText.productName + " and " + uiText.productDesc + " cannot be empty.");
             return; 
         }
-        if (apiMode === 'default' && !DEFAULT_API_KEY && !savedApiKey) {
+        if (apiMode === 'custom' && !savedApiKey) {
             setError(uiText.errorSetApiKey);
             return;
         }
