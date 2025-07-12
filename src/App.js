@@ -1,3 +1,5 @@
+// src/App.js
+
 import React, { useState, useEffect } from 'react';
 import { uiTextConfig, systemPrompts } from './config';
 import { setCookie, getCookie } from './utils/cookieHelper';
@@ -8,7 +10,7 @@ import GeneratorPage from './components/GeneratorPage';
 import SettingsPage from './components/SettingsPage';
 import Footer from './components/Footer';
 import ThankYouModal from './components/ThankYouModal';
-import ApiKeyAppliedModal from './components/ApiKeyAppliedModal';
+import NotificationModal from './components/NotificationModal'; // Diganti
 import RegenerateModal from './components/RegenerateModal';
 
 export default function App() {
@@ -20,29 +22,30 @@ export default function App() {
     const [error, setError] = useState(null);
     const [generatedContent, setGeneratedContent] = useState([]);
     const [showInitialSetup, setShowInitialSetup] = useState(false);
-    
-    // Modal State
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false); // Baru
+
+    // Modal & Notification State
     const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
-    const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
     const [isRegenModalOpen, setIsRegenModalOpen] = useState(false);
+    const [notification, setNotification] = useState({ isOpen: false, message: '' }); // Baru
     const [regenModalData, setRegenModalData] = useState({ content: null, index: -1, type: '' });
     
-    // UI Text based on language
+    // UI Text
     const uiText = uiTextConfig[language];
 
-    // Form Inputs State
+    // Form Inputs
     const [productName, setProductName] = useState('');
     const [productDesc, setProductDesc] = useState('');
     const [languageStyle, setLanguageStyle] = useState('Storytelling');
-    const [hookType, setHookType] = useState('Stop Scrolling');
+    const [hookType, setHookType] = useState('Problem Call Out');
     const [contentType, setContentType] = useState('single');
     const [scriptCount, setScriptCount] = useState(1);
     const [carouselSlideCount, setCarouselSlideCount] = useState(5);
-    const [targetAudience, setTargetAudience] = useState('Young Professionals');
+    const [targetAudience, setTargetAudience] = useState('Profesional Muda');
     
-    // Settings State
-    const [systemPrompt, setSystemPrompt] = useState(systemPrompts[language]);
-    const [savedSystemPrompt, setSavedSystemPrompt] = useState(systemPrompts[language]);
+    // Settings
+    const [systemPrompt, setSystemPrompt] = useState(systemPrompts.id);
+    const [savedSystemPrompt, setSavedSystemPrompt] = useState(systemPrompts.id);
     const [apiMode, setApiMode] = useState('default');
     const [userApiKey, setUserApiKey] = useState('');
     const [savedApiKey, setSavedApiKey] = useState('');
@@ -64,19 +67,18 @@ export default function App() {
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
         script.async = true;
         document.body.appendChild(script);
-        return () => {
-            document.body.removeChild(script);
-        };
+        return () => { document.body.removeChild(script); };
     }, []);
 
     useEffect(() => {
         const keyFromCookie = getCookie('anotechhub_apikey');
+        const hasVisited = getCookie('anotechhub_visited');
         if (keyFromCookie) {
             setApiMode('custom');
             setUserApiKey(keyFromCookie);
             setSavedApiKey(keyFromCookie);
             setShowInitialSetup(false);
-        } else {
+        } else if (!hasVisited) {
             setShowInitialSetup(true);
         }
     }, []);
@@ -84,12 +86,15 @@ export default function App() {
     // --- API & LOGIC ---
 
     const getApiResponse = async (prompt, schema) => {
+        // Menggunakan environment variable Netlify sesuai permintaan Anda
         const activeApiKey = apiMode === 'custom' && savedApiKey ? savedApiKey : process.env.REACT_APP_DEFAULT_API_KEY;
+        
         const payload = {
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             generationConfig: { responseMimeType: "application/json", responseSchema: schema }
         };
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeApiKey}`;
+        
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -102,6 +107,7 @@ export default function App() {
     };
     
     const handleGenerate = async () => {
+        // (Logika fungsi ini tidak berubah, bisa gunakan versi sebelumnya)
         if (!productName || !productDesc) { 
             setError(uiText.productName + " and " + uiText.productDesc + " cannot be empty.");
             return; 
@@ -110,11 +116,9 @@ export default function App() {
             setError(uiText.errorSetApiKey);
             return;
         }
-
         setIsLoading(true);
         setGeneratedContent([]);
         setError(null);
-
         const languageResponse = language === 'id' ? 'Indonesian' : 'English';
         const basePromptInfo = `\nProduct Name: "${productName}"\nDescription: "${productDesc}"\nLanguage Style: ${languageStyle}\nTarget Audience: ${targetAudience}\nHook Type to use: "${hookType}".\nRespond in ${languageResponse}.`;
         let userPrompt, schema;
@@ -139,6 +143,7 @@ export default function App() {
     };
 
     const handleModalRegenerate = async (instructions, updatedContent = null) => {
+        // (Logika fungsi ini tidak berubah, bisa gunakan versi sebelumnya)
         const { content, index, type } = regenModalData;
         if (updatedContent) {
             setGeneratedContent(prev => prev.map((item, i) => (i === index ? updatedContent : item)));
@@ -158,17 +163,23 @@ export default function App() {
             return null;
         }
     };
+    
+    const showNotification = (message) => {
+        setNotification({ isOpen: true, message });
+    };
 
     const handleSaveApiSettings = () => {
         if (apiMode === 'custom') {
             setCookie('anotechhub_apikey', userApiKey, 365);
             setSavedApiKey(userApiKey);
-            if (userApiKey) setIsApiKeyModalOpen(true);
+            if (userApiKey) showNotification(uiText.apiKeyAppliedMessage);
         } else {
-            setCookie('anotechhub_apikey', '', -1); // Expire cookie
+            setCookie('anotechhub_apikey', '', -1);
             setSavedApiKey('');
             setUserApiKey('');
+            showNotification(uiText.settingsSavedMessage);
         }
+        setCookie('anotechhub_visited', 'true', 365);
         setShowInitialSetup(false);
     };
     
@@ -193,7 +204,7 @@ export default function App() {
             case 'generator':
                 return <GeneratorPage {...generatorProps} />;
             case 'settings':
-                return <SettingsPage systemPrompt={systemPrompt} setSystemPrompt={setSystemPrompt} savedSystemPrompt={savedSystemPrompt} onSaveSystemPrompt={() => setSavedSystemPrompt(systemPrompt)} apiMode={apiMode} setApiMode={setApiMode} userApiKey={userApiKey} setUserApiKey={setUserApiKey} onSaveApiSettings={handleSaveApiSettings} uiText={uiText} />;
+                return <SettingsPage systemPrompt={systemPrompt} setSystemPrompt={setSystemPrompt} savedSystemPrompt={savedSystemPrompt} onSaveSystemPrompt={() => {setSavedSystemPrompt(systemPrompt); showNotification(uiText.settingsSavedMessage);}} apiMode={apiMode} setApiMode={setApiMode} userApiKey={userApiKey} setUserApiKey={setUserApiKey} onSaveApiSettings={handleSaveApiSettings} uiText={uiText} setCurrentPage={setCurrentPage} />;
             default:
                 return <GeneratorPage {...generatorProps} />;
         }
@@ -201,14 +212,14 @@ export default function App() {
 
     return (
         <div className={`min-h-screen font-sans flex flex-col ${theme === 'light' ? 'bg-gray-50 text-gray-800' : 'bg-slate-900 text-gray-200'} transition-colors duration-300`}>
-            <Header theme={theme} setTheme={setTheme} language={language} setLanguage={setLanguage} uiText={uiText} />
+            <Header theme={theme} setTheme={setTheme} language={language} setLanguage={setLanguage} uiText={uiText} onLogoClick={() => setCurrentPage('generator')} onUserClick={() => setIsMobileSidebarOpen(true)} />
             <div className="flex flex-1">
                 <main className="flex-1 p-4 sm:p-6 lg:p-8">{renderPage()}</main>
-                <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} uiText={uiText} />
+                <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} uiText={uiText} isOpen={isMobileSidebarOpen} onClose={() => setIsMobileSidebarOpen(false)} />
             </div>
             <Footer />
             <ThankYouModal isOpen={isThankYouModalOpen} onClose={() => setIsThankYouModalOpen(false)} uiText={uiText} />
-            <ApiKeyAppliedModal isOpen={isApiKeyModalOpen} onClose={() => setIsApiKeyModalOpen(false)} uiText={uiText} />
+            <NotificationModal isOpen={notification.isOpen} onClose={() => setNotification({ isOpen: false, message: '' })} message={notification.message} />
             <RegenerateModal isOpen={isRegenModalOpen} onClose={() => setIsRegenModalOpen(false)} content={regenModalData.content} onRegenerate={handleModalRegenerate} contentType={regenModalData.type} uiText={uiText} />
         </div>
     );

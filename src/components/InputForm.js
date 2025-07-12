@@ -1,14 +1,17 @@
 // src/components/InputForm.js
 
 import React from 'react';
+import { jsPDF } from "jspdf";
 import { ChevronDown, Bot, RotateCcw, FileDown } from 'lucide-react';
 
+// ... (SelectWrapper component can remain the same)
 const SelectWrapper = ({ children }) => (
     <div className="relative">
         {React.cloneElement(children, { className: `${children.props.className} appearance-none` })}
         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
     </div>
 );
+
 
 const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props }) => {
     const {
@@ -22,8 +25,8 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
     const labelStyle = "block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300";
 
     const hookOptions = {
-        en: ["Stop Scrolling", "You're Doing It Wrong", "Unpopular Opinion", "POV (Point of View)", "Get Ready With Me", "Things I Wish I Knew", "Life Hack", "The Result vs. The Process", "Storytime", "Direct Question"],
-        id: ["Hook 'Berhenti Scrolling'", "Hook 'Cara Kamu Salah'", "Hook 'Opini Tidak Populer'", "Hook 'POV (Sudut Pandang)'", "Hook 'Get Ready With Me'", "Hook 'Andai Aku Tahu Lebih Awal'", "Hook 'Tips & Trik Praktis'", "Hook 'Hasil vs. Proses'", "Hook 'Waktunya Cerita'", "Hook 'Pertanyaan Langsung'"]
+        en: ["Problem Call Out", "Target Call Out", "Potential Benefit", "Specific Number", "Social Proof", "Active Voice", "Confidence & Conviction", "Pattern Interrupt", "Warning & Caution", "Negativity Bias"],
+        id: ["Problem Call Out", "Target Call Out", "Potential Benefit", "Specific Number", "Social Proof", "Active Voice", "Confidence & Conviction", "Pattern Interrupt", "Warning & Caution", "Negativity Bias"]
     };
 
     const audienceOptions = {
@@ -32,6 +35,7 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
     };
 
     const handlePdfDownload = () => {
+        // (This function's logic from the previous update is still valid)
         if (!window.jspdf) {
             alert("PDF library is not loaded yet.");
             return;
@@ -81,7 +85,7 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
                 drawSection(uiText.storytellingBody, item.story, '#1e40af', '#eff6ff', '#dbeafe');
                 drawSection(uiText.callToAction, item.cta, '#166534', '#f0fdf4', '#bbf7d0');
 
-            } else { // Carousel logic from previous version
+            } else { 
                 if (yPos + 100 > pdf.internal.pageSize.getHeight()) {
                     pdf.addPage();
                     yPos = 40;
@@ -102,11 +106,11 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
         openThankYouModal();
     };
 
-
     return (
         <div className="lg:col-span-4 space-y-6">
             <div className="p-6 bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-gray-200/80 dark:border-slate-700/80 shadow-sm">
                 <div className="space-y-4">
+                    {/* ... (Form fields remain the same, they already use dynamic options) ... */}
                     <div>
                         <label className={labelStyle}>{uiText.contentType}</label>
                         <div className="flex gap-2 rounded-lg bg-gray-200/80 dark:bg-slate-900/80 p-1">
@@ -129,12 +133,12 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
                         </div>
                         <div>
                             <label htmlFor="audience" className={labelStyle}>{uiText.targetAudience}</label>
-                            <SelectWrapper><select id="audience" className={inputStyle} value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)}>{audienceOptions[uiText.language === 'id' ? 'id' : 'en'].map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></SelectWrapper>
+                            <SelectWrapper><select id="audience" className={inputStyle} value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)}>{audienceOptions[language === 'id' ? 'id' : 'en'].map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></SelectWrapper>
                         </div>
                     </div>
                     <div>
                         <label htmlFor="hook-type" className={labelStyle}>{uiText.hookType}</label>
-                        <SelectWrapper><select id="hook-type" className={inputStyle} value={hookType} onChange={(e) => setHookType(e.target.value)}>{hookOptions[uiText.language === 'id' ? 'id' : 'en'].map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></SelectWrapper>
+                        <SelectWrapper><select id="hook-type" className={inputStyle} value={hookType} onChange={(e) => setHookType(e.target.value)}>{hookOptions[language === 'id' ? 'id' : 'en'].map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></SelectWrapper>
                     </div>
                     {contentType === 'single' ? (
                         <div>

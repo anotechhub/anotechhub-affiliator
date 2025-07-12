@@ -1,7 +1,7 @@
 // src/components/SettingsPage.js
 
 import React, { useState } from 'react';
-import { ChevronDown, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { ChevronDown, Eye, EyeOff, AlertTriangle, Home } from 'lucide-react';
 
 const SelectWrapper = ({ children }) => (
     <div className="relative">
@@ -10,17 +10,23 @@ const SelectWrapper = ({ children }) => (
     </div>
 );
 
-const SettingsPage = ({ systemPrompt, setSystemPrompt, savedSystemPrompt, onSaveSystemPrompt, apiMode, setApiMode, userApiKey, setUserApiKey, onSaveApiSettings, uiText }) => {
+const SettingsPage = ({ systemPrompt, setSystemPrompt, savedSystemPrompt, onSaveSystemPrompt, apiMode, setApiMode, userApiKey, setUserApiKey, onSaveApiSettings, uiText, setCurrentPage }) => {
     const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
     const labelStyle = "block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300";
     const inputStyle = "w-full p-3 bg-white/60 dark:bg-slate-800/60 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 ring-custom-teal focus:border-custom-teal outline-none transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500";
 
     return (
         <div className="max-w-4xl mx-auto w-full">
-            <h2 className="text-2xl font-bold mb-6">{uiText.settingsTitle}</h2>
+            <div className="flex items-center mb-6 gap-4">
+                 <button onClick={() => setCurrentPage('generator')} className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">
+                    <Home className="w-5 h-5" />
+                </button>
+                <h2 className="text-2xl font-bold">{uiText.settingsTitle}</h2>
+            </div>
+            
             <div className="space-y-8">
-                {/* API Settings */}
-                <div className="p-6 bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-gray-200/80 dark:border-slate-700/80 shadow-sm">
+                {/* ... (Isi form lainnya tetap sama) ... */}
+                 <div className="p-6 bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-gray-200/80 dark:border-slate-700/80 shadow-sm">
                     <h3 className="text-lg font-semibold mb-2">{uiText.apiSettings}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{uiText.apiSettingsDesc}</p>
                     <div>

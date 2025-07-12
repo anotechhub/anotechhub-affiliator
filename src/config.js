@@ -1,5 +1,6 @@
 // src/config.js
 
+// Objek ini tidak perlu diubah
 export const hookTitleMappings = {
     "Problem/Agitate/Solve": { en: "The Core Problem", id: "Inti Masalah" },
     "Before & After": { en: "The Transformation", id: "Transformasi" },
@@ -63,6 +64,8 @@ export const uiTextConfig = {
         close: "Close",
         apiKeyApplied: "API Key Applied!",
         apiKeyAppliedMessage: "Your API key has been saved and will be used for future requests.",
+        settingsSaved: "Settings Saved!",
+        settingsSavedMessage: "Your new settings have been successfully applied.",
         gotIt: "Got it",
         editAndRegenerateModalTitle: "Edit & Regenerate",
         originalVersion: "Original Version",
@@ -77,6 +80,8 @@ export const uiTextConfig = {
         initialSetupTitle: "Welcome to AnoTechHub!",
         initialSetupSubtitle: "To get started, please set up your API key in the settings. You can use our default key or add your own.",
         goToSettings: "Go to Settings",
+        backToGenerator: "Back to Generator",
+        mobilePreview: "Mobile Preview",
     },
     id: {
         ...hookTitleMappings,
@@ -127,6 +132,8 @@ export const uiTextConfig = {
         close: "Tutup",
         apiKeyApplied: "Kunci API Diterapkan!",
         apiKeyAppliedMessage: "Kunci API Anda telah disimpan dan akan digunakan untuk permintaan berikutnya.",
+        settingsSaved: "Pengaturan Disimpan!",
+        settingsSavedMessage: "Pengaturan baru Anda telah berhasil diterapkan.",
         gotIt: "Mengerti",
         editAndRegenerateModalTitle: "Edit & Regenerasi",
         originalVersion: "Versi Asli",
@@ -141,9 +148,12 @@ export const uiTextConfig = {
         initialSetupTitle: "Selamat Datang di AnoTechHub!",
         initialSetupSubtitle: "Untuk memulai, harap atur kunci API Anda di pengaturan. Anda dapat menggunakan kunci default kami atau menambahkan kunci Anda sendiri.",
         goToSettings: "Buka Pengaturan",
+        backToGenerator: "Kembali ke Generator",
+        mobilePreview: "Pratinjau Seluler",
     }
 };
 
+// Prompt sistem tidak perlu diubah
 export const systemPrompts = {
     en: `You are 'Anoboy', an expert AI copywriter specializing in high-conversion affiliate marketing scripts for social media. Your goal is to create content that feels authentic, engaging, and drives action.
 
