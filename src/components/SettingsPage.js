@@ -1,3 +1,5 @@
+// src/components/SettingsPage.js
+
 import React, { useState } from 'react';
 import { ChevronDown, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 
@@ -31,19 +33,22 @@ const SettingsPage = ({ systemPrompt, setSystemPrompt, savedSystemPrompt, onSave
                         </SelectWrapper>
                     </div>
                     {apiMode === 'custom' ? (
-                        <div className="mt-4 relative">
-                            <label htmlFor="api-key" className={labelStyle}>{uiText.yourApiKey}</label>
-                            <input
-                                type={isApiKeyVisible ? "text" : "password"}
-                                id="api-key"
-                                value={userApiKey}
-                                onChange={(e) => setUserApiKey(e.target.value)}
-                                className={`${inputStyle} pr-10`}
-                                placeholder={uiText.apiKeyPlaceholder}
-                            />
-                            <button onClick={() => setIsApiKeyVisible(!isApiKeyVisible)} className="absolute right-3 top-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                                {isApiKeyVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                            </button>
+                        <div className="mt-4">
+                            <div className="relative">
+                                <label htmlFor="api-key" className={labelStyle}>{uiText.yourApiKey}</label>
+                                <input
+                                    type={isApiKeyVisible ? "text" : "password"}
+                                    id="api-key"
+                                    value={userApiKey}
+                                    onChange={(e) => setUserApiKey(e.target.value)}
+                                    className={`${inputStyle} pr-10`}
+                                    placeholder={uiText.apiKeyPlaceholder}
+                                />
+                                <button onClick={() => setIsApiKeyVisible(!isApiKeyVisible)} className="absolute right-3 top-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                    {isApiKeyVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">{uiText.apiKeySaveWarning}</p>
                         </div>
                     ) : (
                          <div className="mt-4 p-4 bg-amber-100/60 dark:bg-amber-900/30 rounded-lg text-amber-800 dark:text-amber-300 text-sm flex gap-3">

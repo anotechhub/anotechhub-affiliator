@@ -1,3 +1,5 @@
+// src/App.js
+
 import React, { useState, useEffect } from 'react';
 import { uiTextConfig, systemPrompts } from './config';
 import { setCookie, getCookie } from './utils/cookieHelper';
@@ -11,14 +13,18 @@ import ThankYouModal from './components/ThankYouModal';
 import ApiKeyAppliedModal from './components/ApiKeyAppliedModal';
 import RegenerateModal from './components/RegenerateModal';
 
+// This would be handled by a proper backend/environment variable in production
+const DEFAULT_API_KEY = 'AIzaSyCjYKoFJiw5TiXgxEd0tX5DqyR2GDhULE'; [cite: 7]
+
 export default function App() {
     // Core App State
     const [theme, setTheme] = useState('light');
-    const [language, setLanguage] = useState('en');
+    const [language, setLanguage] = useState('id'); [cite: 251]
     const [currentPage, setCurrentPage] = useState('generator');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [generatedContent, setGeneratedContent] = useState([]);
+    const [showInitialSetup, setShowInitialSetup] = useState(false); [cite: 266]
     
     // Modal State
     const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
@@ -32,35 +38,32 @@ export default function App() {
     // Form Inputs State
     const [productName, setProductName] = useState('');
     const [productDesc, setProductDesc] = useState('');
-    const [languageStyle, setLanguageStyle] = useState('Storytelling');
-    const [hookType, setHookType] = useState('Problem/Agitate/Solve');
+    const [languageStyle, setLanguageStyle] = useState('Storytelling'); [cite: 257]
+    const [hookType, setHookType] = useState('Stop Scrolling'); [cite: 258]
     const [contentType, setContentType] = useState('single');
     const [scriptCount, setScriptCount] = useState(1);
     const [carouselSlideCount, setCarouselSlideCount] = useState(5);
-    const [targetAudience, setTargetAudience] = useState('Adults');
+    const [targetAudience, setTargetAudience] = useState('Young Professionals'); [cite: 261]
     
     // Settings State
     const [systemPrompt, setSystemPrompt] = useState(systemPrompts[language]);
     const [savedSystemPrompt, setSavedSystemPrompt] = useState(systemPrompts[language]);
-    const [apiMode, setApiMode] = useState('default'); 
+    const [apiMode, setApiMode] = useState('default');
     const [userApiKey, setUserApiKey] = useState('');
     const [savedApiKey, setSavedApiKey] = useState('');
     
     // --- EFFECTS ---
     
-    // Theme Switcher
     useEffect(() => {
         document.documentElement.classList.remove('light', 'dark');
         document.documentElement.classList.add(theme);
     }, [theme]);
     
-    // Language Switcher
     useEffect(() => {
         setSystemPrompt(systemPrompts[language]);
         setSavedSystemPrompt(systemPrompts[language]);
     }, [language]);
 
-    // PDF Library Loader
     useEffect(() => {
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
@@ -71,20 +74,22 @@ export default function App() {
         };
     }, []);
 
-    // Load API Key from Cookie on initial load
     useEffect(() => {
         const keyFromCookie = getCookie('anotechhub_apikey');
         if (keyFromCookie) {
             setApiMode('custom');
             setUserApiKey(keyFromCookie);
             setSavedApiKey(keyFromCookie);
+            setShowInitialSetup(false);
+        } else {
+            setShowInitialSetup(true);
         }
     }, []);
 
     // --- API & LOGIC ---
 
     const getApiResponse = async (prompt, schema) => {
-        const activeApiKey = apiMode === 'custom' ? savedApiKey : process.env.REACT_APP_DEFAULT_API_KEY;
+        const activeApiKey = apiMode === 'custom' && savedApiKey ? savedApiKey : DEFAULT_API_KEY; [cite: 281]
         const payload = {
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             generationConfig: { responseMimeType: "application/json", responseSchema: schema }
@@ -102,14 +107,15 @@ export default function App() {
     };
     
     const handleGenerate = async () => {
-        if (!productName || !productDesc) {
+        if (!productName || !productDesc) { 
             setError(uiText.productName + " and " + uiText.productDesc + " cannot be empty.");
+            return; 
+        }
+        if (apiMode === 'default' && !DEFAULT_API_KEY && !savedApiKey) {
+            setError(uiText.errorSetApiKey);
             return;
         }
-        if (apiMode === 'custom' && !savedApiKey) {
-            setError("Custom API Mode is active, but no API key is saved. Please enter your API key in the Settings page.");
-            return;
-        }
+
         setIsLoading(true);
         setGeneratedContent([]);
         setError(null);
@@ -168,6 +174,7 @@ export default function App() {
             setSavedApiKey('');
             setUserApiKey('');
         }
+        setShowInitialSetup(false);
     };
     
     const handleReset = () => {
@@ -185,7 +192,7 @@ export default function App() {
     // --- RENDER ---
     
     const renderPage = () => {
-        const generatorProps = { isLoading, generatedContent, error, setError, productName, setProductName, productDesc, setProductDesc, languageStyle, setLanguageStyle, hookType, setHookType, scriptCount, setScriptCount, carouselSlideCount, setCarouselSlideCount, targetAudience, setTargetAudience, contentType, setContentType, onGenerate: handleGenerate, onReset: handleReset, openThankYouModal: () => setIsThankYouModalOpen(true), openRegenModal, uiText };
+        const generatorProps = { isLoading, generatedContent, error, setError, productName, setProductName, productDesc, setProductDesc, languageStyle, setLanguageStyle, hookType, setHookType, scriptCount, setScriptCount, carouselSlideCount, setCarouselSlideCount, targetAudience, setTargetAudience, contentType, setContentType, onGenerate: handleGenerate, onReset: handleReset, openThankYouModal: () => setIsThankYouModalOpen(true), openRegenModal, uiText, showInitialSetup, setShowInitialSetup, setCurrentPage };
         
         switch (currentPage) {
             case 'generator':

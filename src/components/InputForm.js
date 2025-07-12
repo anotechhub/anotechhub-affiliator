@@ -1,4 +1,7 @@
+// src/components/InputForm.js
+
 import React from 'react';
+import { jsPDF } from "jspdf";
 import { ChevronDown, Bot, RotateCcw, FileDown } from 'lucide-react';
 
 const SelectWrapper = ({ children }) => (
@@ -19,11 +22,15 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
     const inputStyle = "w-full p-3 bg-white/60 dark:bg-slate-800/60 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 ring-custom-teal focus:border-custom-teal outline-none transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500";
     const labelStyle = "block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300";
 
-    const hookOptions = [
-        "Problem/Agitate/Solve", "Before & After", "Story Hook", "Question Hook",
-        "Contrarian Hook", "Secret Hook", "Statistic Hook", "Objection Hook",
-        "Testimonial Hook", "How-To Hook"
-    ];
+    const hookOptions = {
+        en: ["Stop Scrolling", "You're Doing It Wrong", "Unpopular Opinion", "POV (Point of View)", "Get Ready With Me", "Things I Wish I Knew", "Life Hack", "The Result vs. The Process", "Storytime", "Direct Question"],
+        id: ["Hook 'Berhenti Scrolling'", "Hook 'Cara Kamu Salah'", "Hook 'Opini Tidak Populer'", "Hook 'POV (Sudut Pandang)'", "Hook 'Get Ready With Me'", "Hook 'Andai Aku Tahu Lebih Awal'", "Hook 'Tips & Trik Praktis'", "Hook 'Hasil vs. Proses'", "Hook 'Waktunya Cerita'", "Hook 'Pertanyaan Langsung'"]
+    };
+
+    const audienceOptions = {
+        en: ["Students", "Young Professionals", "Parents", "Gamers", "Tech Enthusiasts", "Fashion & Beauty", "Fitness & Health", "General"],
+        id: ["Pelajar & Mahasiswa", "Profesional Muda", "Orang Tua", "Gamers", "Penggemar Teknologi", "Fashion & Kecantikan", "Kebugaran & Kesehatan", "Umum"]
+    };
 
     const handlePdfDownload = () => {
         if (!window.jspdf) {
@@ -39,64 +46,63 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
             pdf.setTextColor(options.color || '#000000');
             const lines = pdf.splitTextToSize(text, options.maxWidth || 550);
             pdf.text(lines, x, y);
-            return (lines.length * options.size * 1.2); // Estimate height
+            return pdf.getTextDimensions(lines).h;
         };
 
         let yPos = 40;
 
         generatedContent.forEach((item, index) => {
-            if (index > 0 && contentType === 'single') {
-                yPos += 40; // Add space between scripts
-            }
-            if (yPos > 780) { // Check for page break
-                pdf.addPage();
-                yPos = 40;
-            }
+            if (index > 0 && contentType === 'single') { yPos += 40; }
+            if (yPos > 780) { pdf.addPage(); yPos = 40; }
 
             if (contentType === 'single') {
-                yPos += addStyledText(item.title, 40, yPos, { size: 16, style: 'bold', color: '#01a1a8' });
-                yPos += 15;
-                
-                pdf.setDrawColor('#fecaca'); pdf.setFillColor('#fef2f2');
-                pdf.roundedRect(40, yPos, 515, 60, 3, 3, 'FD');
-                addStyledText(uiText.problemCallout, 50, yPos + 15, { size: 10, style: 'bold', color: '#991b1b' });
-                addStyledText(item.problem, 50, yPos + 30, { size: 10, color: '#374151', maxWidth: 495 });
-                yPos += 75;
+                const titleHeight = addStyledText(item.title, 40, yPos, { size: 16, style: 'bold', color: '#01a1a8' });
+                yPos += titleHeight + 20;
 
-                addStyledText(uiText.storytellingBody, 40, yPos, { size: 10, style: 'bold' });
-                yPos += 15;
-                yPos += addStyledText(item.story, 40, yPos, { size: 10, color: '#374151' });
-                yPos += 15;
+                const drawSection = (title, text, titleColor, boxColor, borderColor) => {
+                    if (yPos > pdf.internal.pageSize.getHeight() - 100) {
+                        pdf.addPage();
+                        yPos = 40;
+                    }
+                    const titleHeight = addStyledText(title, 50, yPos + 15, { size: 10, style: 'bold', color: titleColor, maxWidth: 495 });
+                    const textHeight = addStyledText(text, 50, yPos + 15 + titleHeight + 5, { size: 10, color: '#374151', maxWidth: 495 });
+                    const boxHeight = titleHeight + textHeight + 30;
+                    
+                    pdf.setDrawColor(borderColor);
+                    pdf.setFillColor(boxColor);
+                    pdf.roundedRect(40, yPos, 515, boxHeight, 3, 3, 'FD');
 
-                pdf.setDrawColor('#bbf7d0'); pdf.setFillColor('#f0fdf4');
-                pdf.roundedRect(40, yPos, 515, 60, 3, 3, 'FD');
-                addStyledText(uiText.callToAction, 50, yPos + 15, { size: 10, style: 'bold', color: '#166534' });
-                addStyledText(item.cta, 50, yPos + 30, { size: 10, color: '#374151', maxWidth: 495 });
-                yPos += 75;
+                    addStyledText(title, 50, yPos + 15, { size: 10, style: 'bold', color: titleColor, maxWidth: 495 });
+                    addStyledText(text, 50, yPos + 15 + titleHeight + 5, { size: 10, color: '#374151', maxWidth: 495 });
+                    
+                    yPos += boxHeight + 15;
+                };
 
-            } else { // Carousel
-                if (index > 0) pdf.addPage();
-                
-                pdf.setFillColor('#f1f5f9');
-                pdf.rect(0, 0, 595, 842, 'F');
-                pdf.setFillColor('#ffffff');
-                pdf.roundedRect(40, 40, 515, 762, 10, 10, 'F');
-                
-                yPos = 80;
-                addStyledText(`Slide ${item.slide_number}`, 60, yPos, { size: 12, style: 'bold', color: '#64748b' });
-                yPos += 30;
-                yPos += addStyledText(item.title, 60, yPos, { size: 22, style: 'bold', color: '#01a1a8', maxWidth: 480 });
-                yPos += 15;
-                pdf.setDrawColor('#e2e8f0');
-                pdf.line(60, yPos, 535, yPos);
-                yPos += 30;
-                addStyledText(item.content, 60, yPos, { size: 12, color: '#374151', maxWidth: 480 });
+                drawSection(`${uiText.hookStyleTitle}: ${hookType}`, item.problem, '#991b1b', '#fef2f2', '#fecaca');
+                drawSection(uiText.storytellingBody, item.story, '#1e40af', '#eff6ff', '#dbeafe');
+                drawSection(uiText.callToAction, item.cta, '#166534', '#f0fdf4', '#bbf7d0');
+
+            } else { // Carousel logic from previous version
+                if (yPos + 100 > pdf.internal.pageSize.getHeight()) {
+                    pdf.addPage();
+                    yPos = 40;
+                }
+                addStyledText(`Slide ${item.slide_number}: ${item.title}`, 40, yPos, { size: 14, style: 'bold', color: '#01a1a8' });
+                yPos += 20;
+                yPos += addStyledText(item.content, 40, yPos, { size: 11, color: '#374151', maxWidth: 515 });
+                yPos += 25;
+                if (index < generatedContent.length - 1) {
+                    pdf.setDrawColor('#e2e8f0');
+                    pdf.line(40, yPos, 555, yPos);
+                    yPos += 20;
+                }
             }
         });
 
         pdf.save('anotechhub_scripts.pdf');
         openThankYouModal();
     };
+
 
     return (
         <div className="lg:col-span-4 space-y-6">
@@ -124,12 +130,12 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
                         </div>
                         <div>
                             <label htmlFor="audience" className={labelStyle}>{uiText.targetAudience}</label>
-                            <SelectWrapper><select id="audience" className={inputStyle} value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)}><option>Teenagers</option><option>Adults</option><option>Parents</option><option>General</option></select></SelectWrapper>
+                            <SelectWrapper><select id="audience" className={inputStyle} value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)}>{audienceOptions[uiText.language === 'id' ? 'id' : 'en'].map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></SelectWrapper>
                         </div>
                     </div>
                     <div>
                         <label htmlFor="hook-type" className={labelStyle}>{uiText.hookType}</label>
-                        <SelectWrapper><select id="hook-type" className={inputStyle} value={hookType} onChange={(e) => setHookType(e.target.value)}>{hookOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></SelectWrapper>
+                        <SelectWrapper><select id="hook-type" className={inputStyle} value={hookType} onChange={(e) => setHookType(e.target.value)}>{hookOptions[uiText.language === 'id' ? 'id' : 'en'].map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></SelectWrapper>
                     </div>
                     {contentType === 'single' ? (
                         <div>
@@ -144,7 +150,7 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
                     )}
                 </div>
             </div>
-            <div className="flex flex-col gap-4">
+             <div className="flex flex-col gap-4">
                 <div className="flex gap-2">
                     <button onClick={onGenerate} disabled={isLoading} className="w-full flex items-center justify-center gap-3 bg-custom-teal hover:bg-custom-teal-dark text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all disabled:bg-teal-400 disabled:cursor-not-allowed disabled:transform-none">
                         {isLoading ? (<><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div><span>{uiText.generatingButton}</span></>) : (<><Bot className="w-5 h-5" /><span>{uiText.generateButton}</span></>)}
@@ -154,7 +160,7 @@ const InputForm = ({ onGenerate, onReset, isLoading, openThankYouModal, ...props
                     )}
                 </div>
                 {generatedContent.length > 0 && (
-                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                     <div className="flex flex-col sm:flex-row items-center gap-3">
                         <button onClick={handlePdfDownload} className="w-full flex items-center justify-center gap-2 bg-rose-100 hover:bg-rose-200/80 text-rose-600 font-semibold py-2.5 px-4 rounded-lg transition-colors">
                             <FileDown className="w-4 h-4" />{uiText.saveAsPdf}
                         </button>
