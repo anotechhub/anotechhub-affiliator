@@ -1,7 +1,6 @@
 // src/components/InputForm.js
 
 import React from 'react';
-import { jsPDF } from "jspdf";
 import { ChevronDown, Bot, RotateCcw, FileDown } from 'lucide-react';
 
 const SelectWrapper = ({ children }) => (
